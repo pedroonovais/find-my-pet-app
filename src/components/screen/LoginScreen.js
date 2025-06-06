@@ -14,56 +14,18 @@ import {
   KeyboardAvoidingView,
   Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../api/api'; // usa seu axiosInstance
 
 export default function LoginScreen({ navigation }) {
-  const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
-  const formatCpf = (value) => {
-    const numericValue = value.replace(/\D/g, '');
-    let formatted = numericValue;
-    if (numericValue.length > 3 && numericValue.length <= 6) {
-      formatted = numericValue.slice(0, 3) + '.' + numericValue.slice(3);
-    } else if (numericValue.length > 6 && numericValue.length <= 9) {
-      formatted = numericValue.slice(0, 3) + '.' + numericValue.slice(3, 6) + '.' + numericValue.slice(6);
-    } else if (numericValue.length > 9) {
-      formatted =
-        numericValue.slice(0, 3) +
-        '.' +
-        numericValue.slice(3, 6) +
-        '.' +
-        numericValue.slice(6, 9) +
-        '-' +
-        numericValue.slice(9, 11);
-    }
+  const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+  const validateSenha = (senha) => senha.length >= 6;
 
-    return formatted;
-  };
-
-  const handleCpfChange = (text) => {
-    if (text.length <= 14) {
-      setCpf(formatCpf(text));
-    }
-  };
-
-  const validateEmail = (email) => {
-    const regexEmail = /^\S+@\S+\.\S+$/;
-    return regexEmail.test(email);
-  };
-
-  const validateSenha = (senha) => {
-    return senha.length >= 6;
-  };
-
-  const handleLogin = () => {
-    const numericCpf = cpf.replace(/\D/g, '');
-    if (numericCpf.length !== 11) {
-      Alert.alert('CPF inválido', 'O CPF deve conter exatamente 11 dígitos numéricos.');
-      return;
-    }
-
+  const handleLogin = async () => {
     if (!validateEmail(email)) {
       Alert.alert('Email inválido', 'Por favor, insira um endereço de email válido.');
       return;
@@ -74,11 +36,22 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    navigation.replace('Home', { cpf, email, senha });
-  };
+    try {
+      const response = await api.post('/auth/login', {
+        email,
+        password: senha,
+      });
 
-  const handleBack = () => {
-    navigation.goBack();
+      const { accessToken, refreshToken } = response.data;
+
+      await AsyncStorage.setItem('accessToken', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+
+      navigation.replace('Home', { email });
+    } catch (error) {
+      console.error('Erro no login:', error);
+      Alert.alert('Erro no login', 'Email ou senha incorretos. Verifique suas credenciais.');
+    }
   };
 
   return (
@@ -90,9 +63,8 @@ export default function LoginScreen({ navigation }) {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={22} color="#fff" style={styles.iconShadow} />
           <Text style={[styles.backText, styles.iconShadow]}>Voltar</Text>
         </TouchableOpacity>
@@ -103,24 +75,13 @@ export default function LoginScreen({ navigation }) {
           activeOpacity={0.8}
         >
           <Ionicons name="help-circle-outline" size={20} color="#fff" style={styles.iconShadow} />
-          <Text style={[styles.faleConoscoText, styles.iconShadow]}>Fale Conosco</Text>
+          <Text style={[styles.faleConoscoText, styles.iconShadow]}>Ajuda</Text>
         </TouchableOpacity>
 
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <Image source={require('../../../assets/logo.png')} style={styles.logo} />
             <Text style={styles.title}>Login</Text>
-
-            <Text style={styles.label}>CPF</Text>
-            <TextInput
-              placeholder="Digite seu CPF"
-              value={cpf}
-              onChangeText={handleCpfChange}
-              keyboardType="numeric"
-              maxLength={14}
-              style={styles.input}
-              placeholderTextColor="#999"
-            />
 
             <Text style={styles.label}>Email</Text>
             <TextInput
@@ -151,7 +112,7 @@ export default function LoginScreen({ navigation }) {
 
         <Modal
           animationType="fade"
-          transparent={true}
+          transparent
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}
         >
@@ -178,9 +139,7 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
   container: {
     flexGrow: 1,
     paddingHorizontal: 30,
