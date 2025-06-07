@@ -15,7 +15,7 @@ import {
   Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../../api/api'; // usa seu axiosInstance
+import api from '../../api/api';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -23,7 +23,6 @@ export default function LoginScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
-  const validateSenha = (senha) => senha.length >= 6;
 
   const handleLogin = async () => {
     if (!validateEmail(email)) {
@@ -31,23 +30,22 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    if (!validateSenha(senha)) {
-      Alert.alert('Senha inválida', 'A senha deve conter no mínimo 6 caracteres.');
-      return;
-    }
-
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post('/login', {
         email,
         password: senha,
       });
 
-      const { accessToken, refreshToken } = response.data;
+      const { token, type } = response.data;
 
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
+      if (!token) {
+        throw new Error('Token não retornado pela API');
+      }
 
-      navigation.replace('Home', { email });
+      // Armazenar o token completo com o prefixo Bearer
+      await AsyncStorage.setItem('accessToken', `${type} ${token}`);
+
+      navigation.replace('Home', { email: response.data.email });
     } catch (error) {
       console.error('Erro no login:', error);
       Alert.alert('Erro no login', 'Email ou senha incorretos. Verifique suas credenciais.');

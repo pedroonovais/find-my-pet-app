@@ -1,38 +1,32 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { applyAuthTokenInterceptor } from 'react-native-axios-jwt';
 
-const API_URL = 'http://192.168.0.15:8080/';
+const API_URL = 'http://192.168.0.15:8080';
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
 });
 
-const getAuthTokens = async () => {
-  const accessToken = await AsyncStorage.getItem('accessToken');
-  const refreshToken = await AsyncStorage.getItem('refreshToken');
-  return { accessToken, refreshToken };
-};
-
-const setAuthTokens = async ({ accessToken, refreshToken }) => {
-  await AsyncStorage.setItem('accessToken', accessToken);
-  await AsyncStorage.setItem('refreshToken', refreshToken);
-};
-
-const requestRefresh = async (refreshToken) => {
-  const response = await axios.post(`${API_URL}/auth/refresh`, {
-    refreshToken,
-  });
-  return {
-    accessToken: response.data.accessToken,
-    refreshToken: response.data.refreshToken,
-  };
-};
-
-applyAuthTokenInterceptor(axiosInstance, {
-  requestRefresh,
-  getAuthTokens,
-  setAuthTokens,
+axiosInstance.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
+
+axiosInstance.interceptors.response.use(
+  response => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.warn('Token inválido ou expirado. Removendo token e voltando para o login.');
+
+      await AsyncStorage.removeItem('accessToken');
+      // Aqui você poderia opcionalmente redirecionar para o login com alguma navegação global se tiver (ex.: NavigationService)
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;

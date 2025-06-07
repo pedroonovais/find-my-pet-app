@@ -29,7 +29,7 @@ export default function WelcomeScreen({ navigation }) {
         <Image source={require('../../../assets/logo.png')} style={styles.logo} />
 
         <Text style={styles.title}>Seja bem-vindo à FindMyPet!</Text>
-        <Text style={styles.subtitle}>Faça login para continuar!</Text>
+        <Text style={styles.subtitle}>Faça login ou crie uma conta para continuar!</Text>
 
         <TouchableOpacity
           style={styles.button}
@@ -37,6 +37,14 @@ export default function WelcomeScreen({ navigation }) {
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Register')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Criar conta</Text>
         </TouchableOpacity>
 
         <Modal
@@ -123,11 +131,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+    margin: 5,
+    minWidth: 250,
   },
   buttonText: {
     color: '#f0f0f0',
     fontSize: 20,
     fontWeight: '600',
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,
