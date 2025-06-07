@@ -245,8 +245,8 @@ export default function ReportsScreen() {
           <Text style={styles.backText}>Voltar</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Relatórios 📋</Text>
-        <Text style={styles.subtitle}>Gerenciamento de ocorrências</Text>
+        <Text style={styles.title}>Reports 📋</Text>
+        <Text style={styles.subtitle}>Gerenciamento de reports</Text>
 
         <TouchableOpacity
           style={styles.addButton}
