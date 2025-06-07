@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation, route }) {
             onPress={() => navigation.navigate('Perdidos')}
           >
             <Ionicons name="paw" size={42} color="#fff" />
-            <Text style={styles.cardText}>Perdidos</Text>
+            <Text style={styles.cardText}>Animais</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
