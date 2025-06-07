@@ -84,7 +84,7 @@ export default function PerfilScreen({ route, navigation }) {
 
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.goBack()}
               activeOpacity={0.8}
             >
               <Ionicons name="return-down-back" size={18} color="#fff" />
