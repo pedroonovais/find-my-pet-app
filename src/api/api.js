@@ -22,7 +22,7 @@ axiosInstance.interceptors.response.use(
       console.warn('Token inválido ou expirado. Removendo token e voltando para o login.');
 
       await AsyncStorage.removeItem('accessToken');
-      // Aqui você poderia opcionalmente redirecionar para o login com alguma navegação global se tiver (ex.: NavigationService)
+      
     }
 
     return Promise.reject(error);
