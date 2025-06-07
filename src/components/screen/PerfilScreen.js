@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function formatCPF(cpf) {
   if (!cpf) return '';
@@ -75,35 +76,19 @@ export default function PerfilScreen({ route, navigation }) {
             <Text style={styles.title}>Perfil do Usuário</Text>
 
             <View style={styles.infoGroup}>
-              <Text style={styles.label}>CPF (não editável)</Text>
-              <View style={[styles.box, styles.boxDisabled]}>
-                <Text style={[styles.value, styles.valueDisabled]}>
-                  {formatCPF(cpf)}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.infoGroup}>
               <Text style={styles.label}>Email</Text>
               <View style={styles.box}>
-                <Text style={styles.value}>{email}</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoGroup}>
-              <Text style={styles.label}>Senha</Text>
-              <View style={styles.box}>
-                <Text style={styles.value}>{'*'.repeat(senha.length)}</Text>
+                <Text style={styles.value}>{AsyncStorage.getItem('email')}</Text>
               </View>
             </View>
 
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => setModalVisible(true)}
+              onPress={() => navigation.navigate('Home')}
               activeOpacity={0.8}
             >
-              <Ionicons name="pencil" size={18} color="#fff" />
-              <Text style={styles.editButtonText}>Editar Perfil</Text>
+              <Ionicons name="return-down-back" size={18} color="#fff" />
+              <Text style={styles.editButtonText}>Voltar</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
