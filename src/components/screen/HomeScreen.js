@@ -24,46 +24,32 @@ export default function HomeScreen({ navigation, route }) {
           </Text>
         </View>
 
-        <View style={styles.grid}>
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: '#e57373' }]}
-            onPress={() => navigation.navigate('Reports')}
-          >
-            <MaterialIcons name="report" size={42} color="#fff" />
-            <Text style={styles.cardText}>Reports</Text>
-          </TouchableOpacity>
+        <View style={styles.gridContainer}>
+          <View style={styles.grid}>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: '#e57373' }]}
+              onPress={() => navigation.navigate('Reports')}
+            >
+              <MaterialIcons name="report" size={56} color="#fff" />
+              <Text style={styles.cardText}>Reports</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: '#7e57c2' }]}
-            onPress={() => navigation.navigate('Perdidos')}
-          >
-            <Ionicons name="paw" size={42} color="#fff" />
-            <Text style={styles.cardText}>Animais</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: '#7e57c2' }]}
+              onPress={() => navigation.navigate('Perdidos')}
+            >
+              <Ionicons name="paw" size={56} color="#fff" />
+              <Text style={styles.cardText}>Animais</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: '#81c784' }]}
-            onPress={() => navigation.navigate('Adocao')}
-          >
-            <FontAwesome5 name="hand-holding-heart" size={38} color="#fff" />
-            <Text style={styles.cardText}>Adoção</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: '#64b5f6' }]}
-            onPress={() => navigation.navigate('Perfil', { cpf, email, senha })}
-          >
-            <Ionicons name="person" size={42} color="#fff" />
-            <Text style={styles.cardText}>Perfil</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: '#ffb74d' }]}
-            onPress={() => navigation.navigate('Alert')}
-          >
-            <Ionicons name="alert-circle" size={42} color="#fff" />
-            <Text style={styles.cardText}>Alertas</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: '#64b5f6' }]}
+              onPress={() => navigation.navigate('Perfil', { cpf, email, senha })}
+            >
+              <Ionicons name="person" size={56} color="#fff" />
+              <Text style={styles.cardText}>Perfil</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
       </View>
@@ -117,19 +103,23 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     fontWeight: 'bold',
   },
+  gridContainer: {
+    flex: 1,
+    justifyContent: 'center', // centraliza verticalmente
+    alignItems: 'center',
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 10,
   },
   card: {
-    width: 140,
-    height: 140,
-    borderRadius: 20,
+    width: 180,
+    height: 180,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 10,
+    margin: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
@@ -137,8 +127,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   cardText: {
-    marginTop: 10,
-    fontSize: 16,
+    marginTop: 12,
+    fontSize: 18,
     fontWeight: '600',
     color: '#fff',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
