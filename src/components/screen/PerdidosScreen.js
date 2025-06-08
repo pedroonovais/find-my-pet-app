@@ -30,7 +30,6 @@ export default function PerdidosScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
 
-  // Estado para o formulário
   const [formData, setFormData] = useState({
     nomeAnimal: '',
     especieAnimal: 'Cachorro',
@@ -39,7 +38,6 @@ export default function PerdidosScreen() {
     tipoAnimal: 'Resgatado',
   });
 
-  // Opções para os seletores
   const especies = ['Cachorro', 'Gato', 'Outro'];
   const portes = ['Pequeno', 'Médio', 'Grande'];
   const tipos = ['Adotado', 'Resgatado', 'Disponível'];
@@ -86,7 +84,6 @@ export default function PerdidosScreen() {
         return;
       }
 
-      // Preparar dados no formato esperado pela API
       const animalData = {
         nomeAnimal: formData.nomeAnimal,
         especieAnimal: formData.especieAnimal,
@@ -95,17 +92,14 @@ export default function PerdidosScreen() {
         tipoAnimal: formData.tipoAnimal
       };
 
-      // Configuração do cabeçalho com o token
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
 
       if (isEditing && animalSelecionado) {
-        // Atualizar animal existente
         await api.put(`/animal/${animalSelecionado.idAnimal}`, animalData, config);
         Alert.alert('Sucesso', 'Animal atualizado com sucesso!');
       } else {
-        // Criar novo animal
         await api.post('/animal', animalData, config);
         Alert.alert('Sucesso', 'Animal adicionado com sucesso!');
       }
@@ -116,7 +110,6 @@ export default function PerdidosScreen() {
     } catch (error) {
       console.error('Erro ao salvar animal:', error);
       
-      // Mensagem de erro mais detalhada
       if (error.response) {
         console.log('Resposta do servidor:', error.response.data);
         Alert.alert('Erro', `Erro ${error.response.status}: ${error.response.data.message || 'Falha na autenticação'}`);
@@ -133,7 +126,6 @@ export default function PerdidosScreen() {
       const token = await AsyncStorage.getItem('accessToken');
       if (!token) return;
 
-      // Configuração do cabeçalho com o token
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };

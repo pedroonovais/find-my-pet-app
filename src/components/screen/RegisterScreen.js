@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../../api/api'; // Ajuste o caminho conforme necessário
+import api from '../../api/api';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation }) {
   const [tipoPessoa, setTipoPessoa] = useState('Resgatante');
   const [loading, setLoading] = useState(false);
 
-  const tiposPessoa = ['Resgatante', 'Adotante', 'Voluntário'];
+  const tiposPessoa = ['Resgatante', 'Denunciante', 'Adotante'];
 
   const formatCPF = (value) => {
     const numericValue = value.replace(/\D/g, '');
@@ -130,18 +130,16 @@ export default function RegisterScreen({ navigation }) {
     try {
       setLoading(true);
       
-      // Preparar dados para a API
       const userData = {
         nome: name,
-        cpf: cpf.replace(/\D/g, ''), // Remove formatação
-        telefone: telefone.replace(/\D/g, ''), // Remove formatação
+        cpf: cpf.replace(/\D/g, ''), 
+        telefone: telefone.replace(/\D/g, ''),
         tipoPessoa: tipoPessoa,
         email: email,
-        role: "ADMIN", // Fixo conforme especificado
+        role: "ADMIN",
         senha: password
       };
 
-      // Chamada para API
       const response = await api.post('/pessoa', userData);
       
       if (response.status === 201) {

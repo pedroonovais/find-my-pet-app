@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   gridContainer: {
     flex: 1,
-    justifyContent: 'center', // centraliza verticalmente
+    justifyContent: 'center', 
     alignItems: 'center',
   },
   grid: {
