@@ -14,29 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function formatCPF(cpf) {
-  if (!cpf) return '';
-  const cleaned = cpf.replace(/\D/g, '');
-  if (cleaned.length !== 11) return cpf;
-  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
-export default function PerfilScreen({ route, navigation }) {
-  const { cpf, email: emailInicial, senha: senhaInicial } = route.params;
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [helpModalVisible, setHelpModalVisible] = useState(false);
-  const [email, setEmail] = useState(emailInicial);
-  const [senha, setSenha] = useState(senhaInicial);
-  const [tempEmail, setTempEmail] = useState(emailInicial);
-  const [tempSenha, setTempSenha] = useState(senhaInicial);
-
-  const handleSave = () => {
-    setEmail(tempEmail);
-    setSenha(tempSenha);
-    setModalVisible(false);
-    alert('Perfil atualizado com sucesso!');
-  };
+export default function PerfilScreen({ navigation }) {
 
   return (
     <ImageBackground
@@ -93,88 +71,6 @@ export default function PerfilScreen({ route, navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <Modal
-        animationType="fade"
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Editar Dados</Text>
-
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={tempEmail}
-              onChangeText={setTempEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="Digite seu email"
-              placeholderTextColor="#bbb"
-              textContentType="emailAddress"
-            />
-
-            <Text style={[styles.label, { marginTop: 20 }]}>Senha</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={tempSenha}
-              onChangeText={setTempSenha}
-              secureTextEntry
-              placeholder="Digite sua senha"
-              placeholderTextColor="#bbb"
-              textContentType="password"
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancel]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.save]}
-                onPress={handleSave}
-              >
-                <Text style={styles.modalButtonText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-      <Modal
-        animationType="fade"
-        transparent
-        visible={helpModalVisible}
-        onRequestClose={() => setHelpModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.helpModalBox}>
-            <Text style={styles.helpModalTitle}>Precisa de Ajuda?</Text>
-            <Text style={styles.helpModalText}>
-              Está com problemas para editar seu perfil?
-            </Text>
-            <Text style={styles.helpModalText}>
-              Entre em contato conosco pelo email:
-            </Text>
-            <Text style={[styles.helpModalText, styles.emailText]}>
-              suporte@findmypet.com
-            </Text>
-
-            <TouchableOpacity
-              style={styles.helpModalButton}
-              onPress={() => setHelpModalVisible(false)}
-            >
-              <Text style={styles.helpModalButtonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ImageBackground>
   );
 }

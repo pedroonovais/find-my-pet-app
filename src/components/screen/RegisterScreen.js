@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
   View,
   Text,
@@ -8,9 +9,12 @@ import {
   Alert,
   ImageBackground,
   ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
- 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../api/api'; // Ajuste o caminho conforme necessário
+
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -20,11 +24,15 @@ export default function RegisterScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
- 
+  const [tipoPessoa, setTipoPessoa] = useState('Resgatante');
+  const [loading, setLoading] = useState(false);
+
+  const tiposPessoa = ['Resgatante', 'Adotante', 'Voluntário'];
+
   const formatCPF = (value) => {
     const numericValue = value.replace(/\D/g, '');
     let formatted = numericValue;
- 
+
     if (numericValue.length > 3 && numericValue.length <= 6) {
       formatted = numericValue.replace(/(\d{3})(\d+)/, '$1.$2');
     } else if (numericValue.length > 6 && numericValue.length <= 9) {
@@ -32,13 +40,13 @@ export default function RegisterScreen({ navigation }) {
     } else if (numericValue.length > 9) {
       formatted = numericValue.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
     }
- 
+
     return formatted;
   };
- 
+
   const formatPhone = (value) => {
     const numericValue = value.replace(/\D/g, '');
- 
+
     if (numericValue.length > 10) {
       return numericValue.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
     } else if (numericValue.length > 5) {
@@ -49,50 +57,51 @@ export default function RegisterScreen({ navigation }) {
       return numericValue.replace(/^(\d*)/, '($1');
     }
   };
- 
+
   const validateCPF = (cpf) => {
     const strCPF = cpf.replace(/[^\d]+/g, '');
- 
+
     if (strCPF.length !== 11) return false;
- 
+
     let sum = 0;
     let remainder;
- 
+
     if (/^(\d)\1+$/.test(strCPF)) return false;
- 
+
     for (let i = 1; i <= 9; i++)
       sum += parseInt(strCPF.substring(i - 1, i)) * (11 - i);
- 
+
     remainder = (sum * 10) % 11;
     if (remainder === 10 || remainder === 11) remainder = 0;
     if (remainder !== parseInt(strCPF.substring(9, 10))) return false;
- 
+
     sum = 0;
     for (let i = 1; i <= 10; i++)
       sum += parseInt(strCPF.substring(i - 1, i)) * (12 - i);
- 
+
     remainder = (sum * 10) % 11;
     if (remainder === 10 || remainder === 11) remainder = 0;
     if (remainder !== parseInt(strCPF.substring(10, 11))) return false;
- 
+
     return true;
   };
- 
+
   const validateEmail = (email) => {
     const regex = /\S+@\S+\.\S+/;
     return regex.test(email);
   };
- 
+
   const validatePhone = (phone) => {
     const numericPhone = phone.replace(/\D/g, '');
     return numericPhone.length >= 10 && numericPhone.length <= 11;
   };
- 
+
   const validatePassword = (password) => {
     return password.length >= 6;
   };
- 
-  const handleRegister = () => {
+
+  const handleRegister = async () => {
+    // Validações
     if (!name.trim()) {
       Alert.alert('Erro', 'Por favor, preencha o nome');
       return;
@@ -117,11 +126,46 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert('Erro', 'As senhas não coincidem');
       return;
     }
- 
-    Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-    navigation.navigate('Login');
+
+    try {
+      setLoading(true);
+      
+      // Preparar dados para a API
+      const userData = {
+        nome: name,
+        cpf: cpf.replace(/\D/g, ''), // Remove formatação
+        telefone: telefone.replace(/\D/g, ''), // Remove formatação
+        tipoPessoa: tipoPessoa,
+        email: email,
+        role: "ADMIN", // Fixo conforme especificado
+        senha: password
+      };
+
+      // Chamada para API
+      const response = await api.post('/pessoa', userData);
+      
+      if (response.status === 201) {
+        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+        navigation.navigate('Login');
+      }
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      
+      let errorMessage = 'Erro ao realizar cadastro';
+      if (error.response) {
+        if (error.response.status === 409) {
+          errorMessage = 'Este CPF ou e-mail já está cadastrado';
+        } else {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      }
+      
+      Alert.alert('Erro', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
- 
+
   return (
     <ImageBackground
       source={require('../../../assets/image.png')}
@@ -136,17 +180,31 @@ export default function RegisterScreen({ navigation }) {
           <Ionicons name="arrow-back" size={24} color="#7a64d9" />
           <Text style={[styles.backText, { color: '#7a64d9' }]}>Voltar</Text>
         </TouchableOpacity>
- 
+
         <Text style={styles.title}>Seja bem-vindo!</Text>
         <Text style={styles.subtitle}>Crie seu cadastro para continuar</Text>
- 
+
         <TextInput
           style={styles.input}
-          placeholder="Nome"
+          placeholder="Nome completo"
           value={name}
           onChangeText={setName}
           autoCapitalize="words"
         />
+        
+        <Text style={styles.inputLabel}>Tipo de Pessoa:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipoPessoa}
+            onValueChange={(itemValue) => setTipoPessoa(itemValue)}
+            style={styles.picker}
+          >
+            {tiposPessoa.map((tipo, index) => (
+              <Picker.Item key={index} label={tipo} value={tipo} />
+            ))}
+          </Picker>
+        </View>
+        
         <TextInput
           style={styles.input}
           placeholder="Telefone"
@@ -171,7 +229,7 @@ export default function RegisterScreen({ navigation }) {
           keyboardType="email-address"
           autoCapitalize="none"
         />
- 
+
         {/* Campo senha */}
         <View style={styles.passwordContainer}>
           <TextInput
@@ -192,7 +250,7 @@ export default function RegisterScreen({ navigation }) {
             />
           </TouchableOpacity>
         </View>
- 
+
         {/* Campo confirmar senha */}
         <View style={styles.passwordContainer}>
           <TextInput
@@ -213,11 +271,19 @@ export default function RegisterScreen({ navigation }) {
             />
           </TouchableOpacity>
         </View>
- 
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
+
+        <TouchableOpacity 
+          style={[styles.button, loading && styles.buttonDisabled]} 
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Cadastrar</Text>
+          )}
         </TouchableOpacity>
- 
+
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>Já tem conta? Faça login</Text>
         </TouchableOpacity>
@@ -225,7 +291,7 @@ export default function RegisterScreen({ navigation }) {
     </ImageBackground>
   );
 }
- 
+
 const styles = StyleSheet.create({
   background: { flex: 1 },
   container: {
@@ -263,6 +329,24 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 15,
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#5a4e9c',
+    marginBottom: 8,
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    color: '#5a4e9c',
+  },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -292,6 +376,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 5,
   },
+  buttonDisabled: {
+    backgroundColor: '#b0a4e8',
+  },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
@@ -304,5 +391,3 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
- 
- 

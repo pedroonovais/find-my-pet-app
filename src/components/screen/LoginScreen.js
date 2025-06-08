@@ -42,8 +42,8 @@ export default function LoginScreen({ navigation }) {
         throw new Error('Token não retornado pela API');
       }
 
-      // Armazenar o token completo com o prefixo Bearer
       await AsyncStorage.setItem('accessToken', `${type} ${token}`);
+      await AsyncStorage.setItem('email', email);
 
       navigation.replace('Home', { email: response.data.email });
     } catch (error) {
